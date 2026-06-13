@@ -1,0 +1,42 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+agent/env/.env.*
+!agent/env/.env.dev.user
+mcp-server/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# Node / ATK
+node_modules/
+.agent/
+
+# ATK build artifacts
+agent/appPackage/build/
+agent/.localConfigs/
+
+# IDE
+.vscode/*
+!.vscode/mcp.json
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & temp
+*.log
+tmp/
+.mcp-auth/

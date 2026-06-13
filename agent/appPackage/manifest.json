@@ -1,0 +1,35 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.19",
+  "version": "1.0.0",
+  "id": "${{TEAMS_APP_ID}}",
+  "developer": {
+    "name": "Risk & Retention Intelligence",
+    "websiteUrl": "https://learn.microsoft.com/fabric/iq/",
+    "privacyUrl": "https://www.microsoft.com/privacy/privacystatement",
+    "termsOfUseUrl": "https://www.microsoft.com/legal/terms-of-use"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "Risk Intelligence${{APP_NAME_SUFFIX}}",
+    "full": "Risk & Retention Intelligence Agent"
+  },
+  "description": {
+    "short": "Grounded risk analytics and retention insights for enterprise controllers.",
+    "full": "An enterprise agent for risk analysts and financial controllers. Queries Microsoft Fabric IQ semantic models for churn drivers, loss recovery metrics, and portfolio risk — with interactive MCP App dashboards and governed write actions via Microsoft Entra ID."
+  },
+  "accentColor": "#0078D4",
+  "copilotAgents": {
+    "declarativeAgents": [
+      {
+        "id": "riskRetentionAgent",
+        "file": "declarativeAgent.json"
+      }
+    ]
+  },
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": ["teams.microsoft.com", "localhost"]
+}

@@ -1,0 +1,57 @@
+{
+  "model_name": "RiskRetentionMetrics",
+  "description": "Reference semantic model for hackathon — map to your Fabric IQ workspace",
+  "tables": [
+    {
+      "name": "FactPortfolioRisk",
+      "columns": ["AccountKey", "SegmentKey", "DateKey", "RiskScore", "ChurnProbability"]
+    },
+    {
+      "name": "DimSegment",
+      "columns": ["SegmentKey", "SegmentName", "Region"]
+    }
+  ],
+  "measures": [
+    {
+      "name": "ChurnRate",
+      "expression": "DIVIDE([Churned Accounts], [Total Accounts])",
+      "format": "0.00%"
+    },
+    {
+      "name": "RetentionScore",
+      "expression": "AVERAGE(FactPortfolioRisk[RetentionScore])",
+      "format": "0.0"
+    },
+    {
+      "name": "NPLRatio",
+      "expression": "DIVIDE([Non-Performing Loans], [Total Loans])",
+      "format": "0.00%"
+    },
+    {
+      "name": "LossRecoveryRate",
+      "expression": "DIVIDE([Recovered Amount], [Total Loss Amount])",
+      "format": "0.00%"
+    },
+    {
+      "name": "WriteOffRatio",
+      "expression": "DIVIDE([Write-Off Amount], [Total Loss Amount])",
+      "format": "0.00%"
+    },
+    {
+      "name": "CollectionEfficiency",
+      "expression": "DIVIDE([Collected Amount], [Due Amount])",
+      "format": "0.00%"
+    },
+    {
+      "name": "ChurnDriverImpact",
+      "description": "Weighted impact score per churn driver from ontology"
+    }
+  ],
+  "dimensions": ["Segment", "Region", "Period", "ChurnDriver", "AccountId", "AccountName"],
+  "fabric_iq_allowed_tools": [
+    "GetSemanticModelSchema",
+    "ExecuteQuery",
+    "ValueSearch",
+    "DiscoverArtifacts"
+  ]
+}

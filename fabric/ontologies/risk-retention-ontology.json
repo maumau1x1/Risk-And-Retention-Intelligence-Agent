@@ -1,0 +1,32 @@
+{
+  "ontology_name": "EnterpriseRiskRetention",
+  "version": "1.0",
+  "entity_types": [
+    {
+      "name": "Customer",
+      "properties": ["account_id", "name", "segment", "region", "contract_tenure_months"]
+    },
+    {
+      "name": "RiskSignal",
+      "properties": ["risk_score", "churn_probability", "npl_flag", "last_review_date"]
+    },
+    {
+      "name": "ChurnDriver",
+      "properties": ["driver_name", "impact_score", "affected_accounts"]
+    },
+    {
+      "name": "RetentionAction",
+      "properties": ["priority", "status", "assigned_team", "due_date"]
+    }
+  ],
+  "relationships": [
+    { "from": "Customer", "to": "RiskSignal", "type": "has_current" },
+    { "from": "Customer", "to": "ChurnDriver", "type": "influenced_by" },
+    { "from": "Customer", "to": "RetentionAction", "type": "requires" }
+  ],
+  "business_rules": [
+    "Accounts with risk_score >= 85 require high-priority retention within 7 days",
+    "Loss recovery rate below 60% triggers regional controller review",
+    "Churn drivers must be ranked by impact_score from semantic model, not LLM inference"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "risk-retention-mcp": {
+      "type": "http",
+      "url": "https://multisaccate-alexandra-biggest.ngrok-free.dev/mcp"
+    }
+  }
+}

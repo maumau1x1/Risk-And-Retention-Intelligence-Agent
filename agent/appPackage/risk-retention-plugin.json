@@ -1,0 +1,259 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.4/schema.json",
+  "schema_version": "v2.4",
+  "name_for_human": "Risk & Retention MCP",
+  "description_for_human": "Query Fabric IQ risk metrics, churn drivers, and retention KPIs.",
+  "description_for_model": "Tools for enterprise risk analysis grounded in Microsoft Fabric IQ. Use for churn analysis, loss recovery metrics, portfolio risk scoring, retention trends, and governed write operations. Dashboard/table tools return Adaptive Card widgets rendered in Copilot chat.",
+  "namespace": "riskretention",
+  "functions": [
+    {
+      "name": "get_risk_dashboard",
+      "description": "Returns an interactive Adaptive Card dashboard with portfolio risk KPIs: ChurnRate, RetentionScore, NPLRatio, LossRecoveryRate, and high-risk account count.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "segment": {
+            "type": "string",
+            "description": "Portfolio segment filter: all, enterprise, smb, or high_risk",
+            "enum": ["all", "enterprise", "smb", "high_risk"]
+          },
+          "period": {
+            "type": "string",
+            "description": "Reporting period: MTD, QTD, YTD, or L12M",
+            "enum": ["MTD", "QTD", "YTD", "L12M"]
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_churn_drivers",
+      "description": "Analyzes and ranks top churn drivers from Fabric IQ ChurnDriverImpact measure, returning an Adaptive Card with impact bars and affected account counts.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "segment": {
+            "type": "string",
+            "description": "Portfolio segment: all, enterprise, smb, or high_risk"
+          },
+          "top_n": {
+            "type": "integer",
+            "description": "Number of top drivers to return, between 1 and 10"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_loss_recovery_metrics",
+      "description": "Retrieves loss recovery rate, write-off ratio, and collection efficiency from Fabric IQ. Returns structured JSON with formatted percentages and USD amounts.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string",
+            "description": "Geographic region filter: all, AMER, EMEA, or APAC",
+            "enum": ["all", "AMER", "EMEA", "APAC"]
+          },
+          "period": {
+            "type": "string",
+            "description": "Reporting period: MTD, QTD, YTD, or L12M",
+            "enum": ["MTD", "QTD", "YTD", "L12M"]
+          }
+        },
+        "required": ["period"]
+      }
+    },
+    {
+      "name": "list_at_risk_accounts",
+      "description": "Lists customer accounts exceeding risk score thresholds. Returns an Adaptive Card table with account name, region, contract tenure, risk score, and churn probability.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "min_risk_score": {
+            "type": "number",
+            "description": "Minimum RiskScore threshold, 0 to 100. Accounts at or above this score are returned."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of accounts to return (default 10, max 50)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_retention_trend",
+      "description": "Shows 12-month retention and churn trend data compared to prior period. Returns an Adaptive Card table with monthly ChurnRate, LossRecoveryRate, and RetentionScore with traffic-light indicators.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string",
+            "description": "Geographic region: all, AMER, EMEA, or APAC",
+            "enum": ["all", "AMER", "EMEA", "APAC"]
+          },
+          "period": {
+            "type": "string",
+            "description": "Trend window: L12M (last 12 months) or YTD",
+            "enum": ["L12M", "YTD"]
+          }
+        }
+      }
+    },
+    {
+      "name": "create_retention_task",
+      "description": "Creates a governed retention outreach task for an at-risk account. Requires Authorization bearer token with Retention.Write scope. In dev mode, auth check is bypassed.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "description": "Account ID to create the retention task for (e.g. ACC-1042)"
+          },
+          "priority": {
+            "type": "string",
+            "description": "Task priority level",
+            "enum": ["critical", "high", "medium", "low"]
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes or context for the retention team"
+          }
+        },
+        "required": ["account_id", "priority"]
+      }
+    },
+    {
+      "name": "flag_account_risk_tier",
+      "description": "Updates the risk tier classification for an account. Governed write operation requiring Retention.Write scope. Tier changes are logged with justification for audit trail.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "description": "Account ID to update (e.g. ACC-1042)"
+          },
+          "tier": {
+            "type": "string",
+            "description": "New risk tier classification",
+            "enum": ["Critical", "High", "Elevated", "Normal"]
+          },
+          "justification": {
+            "type": "string",
+            "description": "Business justification for the tier change (audit trail)"
+          }
+        },
+        "required": ["account_id", "tier"]
+      }
+    }
+  ],
+  "runtimes": [
+    {
+      "type": "RemoteMCPServer",
+      "auth": { "type": "None" },
+      "spec": {
+        "url": "${{MCP_SERVER_URL}}",
+        "mcp_tool_description": {
+          "tools": [
+            {
+              "name": "get_risk_dashboard",
+              "description": "Interactive Adaptive Card portfolio risk dashboard from Fabric IQ.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "segment": { "type": "string" },
+                  "period": { "type": "string" }
+                }
+              },
+              "annotations": { "readOnlyHint": true }
+            },
+            {
+              "name": "analyze_churn_drivers",
+              "description": "Top churn drivers ranked by Fabric IQ ChurnDriverImpact.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "segment": { "type": "string" },
+                  "top_n": { "type": "integer" }
+                }
+              },
+              "annotations": { "readOnlyHint": true }
+            },
+            {
+              "name": "get_loss_recovery_metrics",
+              "description": "Loss recovery KPIs: rate, write-off ratio, collection efficiency.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "region": { "type": "string" },
+                  "period": { "type": "string" }
+                },
+                "required": ["period"]
+              },
+              "annotations": { "readOnlyHint": true }
+            },
+            {
+              "name": "list_at_risk_accounts",
+              "description": "At-risk accounts table with risk score and churn probability.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "min_risk_score": { "type": "number" },
+                  "limit": { "type": "integer" }
+                }
+              },
+              "annotations": { "readOnlyHint": true }
+            },
+            {
+              "name": "get_retention_trend",
+              "description": "12-month churn and retention trend Adaptive Card.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "region": { "type": "string" },
+                  "period": { "type": "string" }
+                }
+              },
+              "annotations": { "readOnlyHint": true }
+            },
+            {
+              "name": "create_retention_task",
+              "description": "Create governed retention outreach task (write — dev bypass in mock mode).",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "account_id": { "type": "string" },
+                  "priority": { "type": "string" },
+                  "notes": { "type": "string" }
+                },
+                "required": ["account_id", "priority"]
+              },
+              "annotations": { "readOnlyHint": false }
+            },
+            {
+              "name": "flag_account_risk_tier",
+              "description": "Flag account risk tier (write — dev bypass in mock mode).",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "account_id": { "type": "string" },
+                  "tier": { "type": "string" },
+                  "justification": { "type": "string" }
+                },
+                "required": ["account_id", "tier"]
+              },
+              "annotations": { "readOnlyHint": false }
+            }
+          ]
+        }
+      },
+      "run_for_functions": [
+        "get_risk_dashboard",
+        "analyze_churn_drivers",
+        "get_loss_recovery_metrics",
+        "list_at_risk_accounts",
+        "get_retention_trend",
+        "create_retention_task",
+        "flag_account_risk_tier"
+      ]
+    }
+  ]
+}
